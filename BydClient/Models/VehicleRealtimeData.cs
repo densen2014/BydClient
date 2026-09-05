@@ -247,7 +247,7 @@ public class VehicleRealtimeData : BaseModel
         OnlineState = TryParseEnum(data["onlineState"] ?? -1, OnlineState.UNKNOWN);
         ConnectState = TryParseEnum(data["connectState"] ?? -1, ConnectState.UNKNOWN);
         VehicleState = TryParseEnum(data["vehicleState"] ?? -1, VehicleState.UNKNOWN);
-        RequestSerial = data["requestSerial"]?.ToString();
+        RequestSerial = data.TryGetValue("requestSerial", out var requestSerial) ? requestSerial?.ToString() : null;
 
         // Battery & range
         ElecPercent = ToNullableFloat(data["elecPercent"]);

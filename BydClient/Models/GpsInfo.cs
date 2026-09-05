@@ -21,43 +21,30 @@ public class GpsInfo : BaseModel
     public string? PositionType { get; private set; }
 
     public GpsInfo() { }
-    public GpsInfo(IDictionary<string, object?> data) : base(data) => Populate(data);
+    public GpsInfo(IDictionary<string, object?> data) : base(data) { }
 
     protected override void Populate(IDictionary<string, object?> data)
     {
         if(data == null) throw new ArgumentNullException(nameof(data));
 
-        // Expect nested "data" object like PHP: $data['data'][...]
-        object? nested = data["data"];
-        if(nested is IDictionary<string, object?> d)
-        {
-            Latitude = ToNullableFloat(d["latitude"]);
-            Longitude = ToNullableFloat(d["longitude"]);
-            Altitude = ToNullableFloat(d["altitude"]);
-            Speed = ToNullableFloat(d["speed"]);
-            Heading = ToNullableFloat(d["heading"]);
-            Direction = ToNullableFloat(d["direction"]);
+        IDictionary<string, object?> source = data.TryGetValue("data", out var nested)
+            && nested is IDictionary<string, object?> nestedData
+                ? nestedData
+                : data;
 
-            if(d.TryGetValue("gpsTimeStamp", out var ts) && ts != null)
-                Timestamp = ParseTimestamp(ts);
+        object? GetValue(string key) => source.TryGetValue(key, out var value) ? value : null;
 
-            PositionType = d["positionType"]?.ToString();
-        }
-        else
-        {
-            // Defensive: if top-level fields are provided directly
-            Latitude = ToNullableFloat(data["latitude"]);
-            Longitude = ToNullableFloat(data["longitude"]);
-            Altitude = ToNullableFloat(data["altitude"]);
-            Speed = ToNullableFloat(data["speed"]);
-            Heading = ToNullableFloat(data["heading"]);
-            Direction = ToNullableFloat(data["direction"]);
+        Latitude = ToNullableFloat(GetValue("latitude"));
+        Longitude = ToNullableFloat(GetValue("longitude"));
+        Altitude = ToNullableFloat(GetValue("altitude"));
+        Speed = ToNullableFloat(GetValue("speed"));
+        Heading = ToNullableFloat(GetValue("heading"));
+        Direction = ToNullableFloat(GetValue("direction"));
 
-            if(data.TryGetValue("gpsTimeStamp", out var ts) && ts != null)
-                Timestamp = ParseTimestamp(ts);
+        if(GetValue("gpsTimeStamp") is { } timestamp)
+            Timestamp = ParseTimestamp(timestamp);
 
-            PositionType = data["positionType"]?.ToString();
-        }
+        PositionType = GetValue("positionType")?.ToString();
     }
 
     private static DateTimeOffset? ParseTimestamp(object timestamp)

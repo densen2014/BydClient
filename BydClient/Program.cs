@@ -1,5 +1,6 @@
 ﻿using BydClient.Config;
 using BydClient.Exceptions;
+using BydClient.Models;
 using Microsoft.Extensions.Configuration;
 
 namespace BydClient;
@@ -15,14 +16,14 @@ internal class Program
         string countryCode = Environment.GetEnvironmentVariable("BYD_COUNTRY_CODE") ?? "NL";
         string language = Environment.GetEnvironmentVariable("BYD_LANGUAGE") ?? "en";
 
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
+        IConfigurationRoot config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
-        var appsettings = config.GetSection("BYD").Get<Appsettings>() ?? new Appsettings(username, password, baseUrl, countryCode, language);
+        Appsettings appsettings = config.GetSection("BYD").Get<Appsettings>() ?? new Appsettings(username, password, baseUrl, countryCode, language);
 
-        var bydConfig = new BydConfig(appsettings.username, appsettings.password, appsettings.baseUrl, appsettings.countryCode, appsettings.language);
-        var client = new Client(bydConfig);
+        BydConfig bydConfig = new(appsettings.username, appsettings.password, appsettings.baseUrl, appsettings.countryCode, appsettings.language);
+        using Client client = new(bydConfig);
 
         try
         {
@@ -31,9 +32,9 @@ internal class Program
             Console.WriteLine("Login successful!\n");
 
             Console.WriteLine("Fetching vehicles...");
-            var vehicles = await client.GetVehiclesAsync();
+            IReadOnlyList<Vehicle> vehicles = await client.GetVehiclesAsync();
 
-            foreach(var vehicle in vehicles)
+            foreach(Vehicle vehicle in vehicles)
             {
                 Console.WriteLine($"=== Vehicle: {vehicle.ModelName} ({vehicle.Vin}) ===");
                 Console.WriteLine($"Brand: {vehicle.BrandName}");
@@ -41,7 +42,7 @@ internal class Program
 
                 // Realtime Data
                 Console.WriteLine("--- Realtime Data ---");
-                var realtime = await client.GetVehicleRealtimeAsync(vehicle.Vin);
+                VehicleRealtimeData realtime = await client.GetVehicleRealtimeAsync(vehicle.Vin);
                 Console.WriteLine($"Online: {realtime.OnlineState}");
                 Console.WriteLine($"Vehicle state: {realtime.VehicleState}");
                 Console.WriteLine($"Battery: {realtime.ElecPercent}%");
@@ -62,7 +63,7 @@ internal class Program
                 Console.WriteLine("--- HVAC Status ---");
                 try
                 {
-                    var hvac = await client.GetHvacStatusAsync(vehicle.Vin);
+                    HvacStatus hvac = await client.GetHvacStatusAsync(vehicle.Vin);
                     Console.WriteLine($"HVAC status: {hvac.Status}");
                     Console.WriteLine($"AC mode: {hvac.AirConditioningMode}");
                     Console.WriteLine($"Wind mode: {hvac.WindMode}");
@@ -81,7 +82,7 @@ internal class Program
                 Console.WriteLine("--- GPS Info ---");
                 try
                 {
-                    var gps = await client.GetGpsInfoAsync(vehicle.Vin);
+                    GpsInfo gps = await client.GetGpsInfoAsync(vehicle.Vin);
                     if(gps.Latitude.HasValue && gps.Longitude.HasValue)
                     {
                         Console.WriteLine($"Location: {gps.Latitude}, {gps.Longitude}");
@@ -102,7 +103,7 @@ internal class Program
                 Console.WriteLine("--- Charging Status ---");
                 try
                 {
-                    var charging = await client.GetChargingStatusAsync(vehicle.Vin);
+                    ChargingStatus charging = await client.GetChargingStatusAsync(vehicle.Vin);
                     Console.WriteLine($"Charging state: {charging.ChargingState}");
                 }
                 catch(BydException ex)
@@ -115,7 +116,7 @@ internal class Program
                 Console.WriteLine("--- Energy Consumption ---");
                 try
                 {
-                    var energy = await client.GetEnergyConsumptionAsync(vehicle.Vin);
+                    EnergyConsumption energy = await client.GetEnergyConsumptionAsync(vehicle.Vin);
                     // You can print energy details here
                     Console.WriteLine($"Total Mileage: {energy.TotalMileage}");
                     Console.WriteLine($"Total Energy: {energy.TotalEnergy}");

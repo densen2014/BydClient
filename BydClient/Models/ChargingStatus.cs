@@ -43,22 +43,24 @@ public class ChargingStatus : BaseModel
 
     protected override void Populate(IDictionary<string, object?> data)
     {
-        ChargingState = TryParseEnum(data["chargingState"] ?? -1, ChargingState.UNKNOWN);
-        ChargerPower = ToNullableFloat(data["chargerPower"]);
-        ChargerVoltage = ToNullableFloat(data["chargerVoltage"]);
-        ChargerCurrent = ToNullableFloat(data["chargerCurrent"]);
-        BatteryCapacity = ToNullableFloat(data["batteryCapacity"]);
-        BatteryVoltage = ToNullableFloat(data["batteryVoltage"]);
-        BatteryCurrent = ToNullableFloat(data["batteryCurrent"]);
-        BatteryTemperature = ToNullableFloat(data["batteryTemperature"]);
-        BatterySOC = ToNullableFloat(data["batterySOC"]);
-        ChargingPower = ToNullableFloat(data["chargingPower"]);
-        ChargingTime = ToNullableInt(data["chargingTime"]);
-        RemainingTime = ToNullableInt(data["remainingTime"]);
-        MileageOfCharge = ToNullableFloat(data["mileageOfCharge"]);
-        MileageOfDay = ToNullableFloat(data["mileageOfDay"]);
-        MileageOfWeek = ToNullableFloat(data["mileageOfWeek"]);
-        MileageOfMonth = ToNullableFloat(data["mileageOfMonth"]);
+        object? GetValue(string key) => data.TryGetValue(key, out var value) ? value : null;
+
+        ChargingState = TryParseEnum(GetValue("chargingState") ?? -1, ChargingState.UNKNOWN);
+        ChargerPower = ToNullableFloat(GetValue("chargerPower"));
+        ChargerVoltage = ToNullableFloat(GetValue("chargerVoltage"));
+        ChargerCurrent = ToNullableFloat(GetValue("chargerCurrent"));
+        BatteryCapacity = ToNullableFloat(GetValue("batteryCapacity"));
+        BatteryVoltage = ToNullableFloat(GetValue("batteryVoltage"));
+        BatteryCurrent = ToNullableFloat(GetValue("batteryCurrent"));
+        BatteryTemperature = ToNullableFloat(GetValue("batteryTemperature"));
+        BatterySOC = ToNullableFloat(GetValue("batterySOC"));
+        ChargingPower = ToNullableFloat(GetValue("chargingPower"));
+        ChargingTime = ToNullableInt(GetValue("chargingTime"));
+        RemainingTime = ToNullableInt(GetValue("remainingTime"));
+        MileageOfCharge = ToNullableFloat(GetValue("mileageOfCharge"));
+        MileageOfDay = ToNullableFloat(GetValue("mileageOfDay"));
+        MileageOfWeek = ToNullableFloat(GetValue("mileageOfWeek"));
+        MileageOfMonth = ToNullableFloat(GetValue("mileageOfMonth"));
 
         if(data.TryGetValue("startTime", out var st) && st != null)
             StartTime = ParseTimestamp(st);
@@ -66,13 +68,13 @@ public class ChargingStatus : BaseModel
         if(data.TryGetValue("endTime", out var et) && et != null)
             EndTime = ParseTimestamp(et);
 
-        ChargingPileName = data["chargingPileName"]?.ToString();
-        ChargingPileSN = data["chargingPileSN"]?.ToString();
-        ChargingType = ToNullableInt(data["chargingType"]);
-        ChargingCost = ToNullableFloat(data["chargingCost"]);
-        ElectricPrice = ToNullableFloat(data["electricPrice"]);
-        ServiceFee = ToNullableFloat(data["serviceFee"]);
-        TotalFee = ToNullableFloat(data["totalFee"]);
+        ChargingPileName = GetValue("chargingPileName")?.ToString();
+        ChargingPileSN = GetValue("chargingPileSN")?.ToString();
+        ChargingType = ToNullableInt(GetValue("chargingType"));
+        ChargingCost = ToNullableFloat(GetValue("chargingCost"));
+        ElectricPrice = ToNullableFloat(GetValue("electricPrice"));
+        ServiceFee = ToNullableFloat(GetValue("serviceFee"));
+        TotalFee = ToNullableFloat(GetValue("totalFee"));
     }
 
     private static DateTimeOffset? ParseTimestamp(object timestamp)
