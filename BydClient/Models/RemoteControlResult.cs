@@ -19,6 +19,7 @@ using System.Collections.Generic;
         public string? Vin { get; private set; }
 
         public string? Uuid { get; private set; }
+        public int? Result { get; private set; }
 
         /// <summary>
         /// Response data as a dictionary. If original payload uses a different shape, adapt parsing before Populate.
@@ -32,13 +33,14 @@ using System.Collections.Generic;
         {
             if(data == null) throw new ArgumentNullException(nameof(data));
 
-            ResultCode = data["resultCode"]?.ToString() ?? string.Empty;
-            ResultMsg = data["resultMsg"]?.ToString() ?? string.Empty;
-            SerialNumber = data["serialNumber"]?.ToString();
-            CommandType = data["commandType"]?.ToString();
-            Vin = data["vin"]?.ToString();
-            Uuid = data["uuid"]?.ToString();
-            ControlState = ToNullableInt(data["controlState"]);
+            ResultCode = GetValue(data, "resultCode", "code")?.ToString() ?? "0";
+            ResultMsg = GetValue(data, "resultMsg", "message", "msg")?.ToString() ?? string.Empty;
+            SerialNumber = GetValue(data, "serialNumber", "requestSerial")?.ToString();
+            CommandType = GetValue(data, "commandType")?.ToString();
+            Vin = GetValue(data, "vin")?.ToString();
+            Uuid = GetValue(data, "uuid")?.ToString();
+            ControlState = ToNullableInt(GetValue(data, "controlState"));
+            Result = ToNullableInt(GetValue(data, "res", "result"));
 
             if(data.TryGetValue("timestamp", out var tsVal) && tsVal != null)
             {
@@ -64,8 +66,19 @@ using System.Collections.Generic;
         //    ResponseData = new Dictionary<string, object?>();
         //}
 
-        ResponseData = data["responseData"] as IDictionary<string, object?> ?? new Dictionary<string, object?>();
+        ResponseData = GetValue(data, "responseData") as IDictionary<string, object?> ?? new Dictionary<string, object?>();
     }
+
+        private static object? GetValue(IDictionary<string, object?> data, params string[] keys)
+        {
+            foreach(var key in keys)
+            {
+                if(data.TryGetValue(key, out var value))
+                    return value;
+            }
+
+            return null;
+        }
 
         private static DateTimeOffset? ParseTimestamp(object timestamp)
         {
@@ -101,7 +114,9 @@ using System.Collections.Generic;
 
         public bool IsSuccess()
         {
-            return string.Equals(ResultCode, "success", StringComparison.OrdinalIgnoreCase)
-                   || ResultCode == "0";
+            var codeSucceeded = string.Equals(ResultCode, "success", StringComparison.OrdinalIgnoreCase)
+                                || ResultCode == "0";
+
+            return codeSucceeded && ControlState != 2 && (Result == null || Result >= 2);
         }
     }

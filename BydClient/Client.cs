@@ -375,7 +375,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "1", null,
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "LOCKDOOR", null,
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -391,7 +391,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "2", null,
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "OPENDOOR", null,
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -408,7 +408,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "3", @params.ToControlParamsMap(),
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "OPENAIR", @params.ToControlParamsMap(),
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -424,7 +424,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "4", null,
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "CLOSEAIR", null,
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -440,7 +440,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "5", null,
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "FLASHLIGHTNOWHISTLE", null,
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -456,7 +456,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "6", null,
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "CLOSEWINDOW", null,
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -472,7 +472,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "7", null,
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "FINDCAR", null,
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -489,7 +489,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "8", @params.ToControlParamsMap(),
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "BOOKINGAIR", @params.ToControlParamsMap(),
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -506,7 +506,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "9", @params.ToControlParamsMap(),
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "VENTILATIONHEATING", @params.ToControlParamsMap(),
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
@@ -523,7 +523,7 @@ public class Client : IDisposable
         var session = await EnsureSessionAsync(cancellationToken);
         var transport = RequireTransport();
 
-        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "10", @params.ToControlParamsMap(),
+        return await ControlApi.PollRemoteControlAsync(_config, session, transport, vin, "BATTERYHEAT", @params.ToControlParamsMap(),
             resolvedPwd, cancellationToken: cancellationToken);
     }
 
