@@ -131,6 +131,30 @@ public class Client : IDisposable
     }
 
     /// <summary>
+    /// Fetch the complete decrypted vehicle-list response, including unknown capability fields.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<string, object>?> GetVehiclesRawAsync(CancellationToken cancellationToken = default)
+    {
+        var session = await EnsureSessionAsync(cancellationToken);
+        var transport = RequireTransport();
+
+        return await VehicleApi.FetchVehicleListRawAsync(_config, session, transport, cancellationToken);
+    }
+
+    /// <summary>
+    /// Fetch the complete decrypted per-vehicle latest configuration.
+    /// </summary>
+    public async Task<IReadOnlyDictionary<string, object>?> GetLatestConfigsRawAsync(
+        IEnumerable<string> vins,
+        CancellationToken cancellationToken = default)
+    {
+        var session = await EnsureSessionAsync(cancellationToken);
+        var transport = RequireTransport();
+
+        return await VehicleApi.FetchLatestConfigsRawAsync(_config, session, transport, vins, cancellationToken);
+    }
+
+    /// <summary>
     /// Trigger + wait for realtime vehicle data.
     /// </summary>
     /// <param name="vin">Vehicle identification number</param>

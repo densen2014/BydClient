@@ -16,6 +16,25 @@ public class ClimateStartParams : IControlParams
     public bool FrontDefrost { get; private set; } = false;
     public bool RearDefrost { get; private set; } = false;
 
+    public ClimateStartParams(
+        int? temperature = null,
+        bool acOn = true,
+        bool heating = false,
+        bool defrost = false,
+        bool frontDefrost = false,
+        bool rearDefrost = false)
+    {
+        if (temperature is < 16 or > 32)
+            throw new ArgumentOutOfRangeException(nameof(temperature), "Temperature must be between 16 and 32 Celsius.");
+
+        Temperature = temperature;
+        AcOn = acOn;
+        Heating = heating;
+        Defrost = defrost;
+        FrontDefrost = frontDefrost;
+        RearDefrost = rearDefrost;
+    }
+
     /// <summary>
     /// Convert to control parameters map.
     /// </summary>
