@@ -136,6 +136,10 @@ internal class Program
                     Console.WriteLine($"Start Time: {energy.StartTime}");
                     Console.WriteLine($"End Time: {energy.EndTime}");
                 }
+                catch(BydApiException ex)
+                {
+                    Console.WriteLine($"Energy API error {ex.ErrorCode} at {ex.Endpoint}: {ex.Message}");
+                }
                 catch(BydException ex)
                 {
                     Console.WriteLine($"Energy error: {ex.Message}");

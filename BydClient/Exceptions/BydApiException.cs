@@ -10,6 +10,11 @@ namespace BydClient.Exceptions;
 public class BydApiException : BydException
 {
     /// <summary>
+    /// Gets the error code returned by the BYD API.
+    /// </summary>
+    public int ErrorCode { get; }
+
+    /// <summary>
     /// Gets the API endpoint that was called when the exception occurred.
     /// </summary>
     public string Endpoint { get; }
@@ -24,10 +29,8 @@ public class BydApiException : BydException
     public BydApiException(string message, int code = 0, string endpoint = "", Exception? previous = null)
         : base(message, previous)
     {
+        ErrorCode = code;
         Endpoint = endpoint;
-        // Nota: La proprietà HResult di System.Exception può essere utilizzata per memorizzare un codice di errore specifico.
-        // Tuttavia, è importante notare che HResult è un campo protetto e non dovrebbe essere modificato direttamente.
-        // Invece, è consigliabile utilizzare la proprietà HResult solo per leggere il codice di errore associato all'eccezione.
-        this.HResult = code;
+        HResult = code;
     }
 }
