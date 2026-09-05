@@ -10,17 +10,18 @@ internal class Program
 {
     static async Task Main()
     {
-        string username = Environment.GetEnvironmentVariable("BYD_USERNAME") ?? "test@example.com";
-        string password = Environment.GetEnvironmentVariable("BYD_PASSWORD") ?? "password123";
-        string baseUrl = Environment.GetEnvironmentVariable("BYD_BASE_URL") ?? "https://dilinkappoversea-eu.byd.auto";
-        string countryCode = Environment.GetEnvironmentVariable("BYD_COUNTRY_CODE") ?? "NL";
-        string language = Environment.GetEnvironmentVariable("BYD_LANGUAGE") ?? "en";
-
         IConfigurationRoot config = new ConfigurationBuilder()
             .SetBasePath(AppContext.BaseDirectory)
             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
             .Build();
-        Appsettings appsettings = config.GetSection("BYD").Get<Appsettings>() ?? new Appsettings(username, password, baseUrl, countryCode, language);
+        Appsettings defaults = new("test@example.com", "password123", "https://dilinkappoversea-eu.byd.auto", "NL", "en");
+        Appsettings fileSettings = config.GetSection("BYD").Get<Appsettings>() ?? defaults;
+        Appsettings appsettings = new(
+            Environment.GetEnvironmentVariable("BYD_USERNAME") ?? fileSettings.username,
+            Environment.GetEnvironmentVariable("BYD_PASSWORD") ?? fileSettings.password,
+            Environment.GetEnvironmentVariable("BYD_BASE_URL") ?? fileSettings.baseUrl,
+            Environment.GetEnvironmentVariable("BYD_COUNTRY_CODE") ?? fileSettings.countryCode,
+            Environment.GetEnvironmentVariable("BYD_LANGUAGE") ?? fileSettings.language);
 
         BydConfig bydConfig = new(appsettings.username, appsettings.password, appsettings.baseUrl, appsettings.countryCode, appsettings.language);
         using Client client = new(bydConfig);
