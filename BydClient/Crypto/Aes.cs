@@ -97,17 +97,21 @@ namespace BydClient.Crypto;
 
                 using ICryptoTransform decryptor = aes.CreateDecryptor();
                 byte[] decryptedBytes = decryptor.TransformFinalBlock(cipher, 0, cipher.Length);
-                string decrypted = Encoding.UTF8.GetString(decryptedBytes);
+
+                // Always remove PKCS#7 padding before interpreting as UTF-8/JSON to avoid
+                // JsonDocument throwing on trailing padding bytes (first-chance exceptions).
+                string unpadded = UnpadPkcs7(decryptedBytes);
 
                 try
                 {
                     // JSON_THROW_ON_ERROR equivalent
-                    using JsonDocument _ = JsonDocument.Parse(decrypted);
-                    return decrypted;
+                    using JsonDocument _ = JsonDocument.Parse(unpadded);
+                    return unpadded;
                 }
                 catch(JsonException)
                 {
-                    return UnpadPkcs7(decryptedBytes);
+                    // If unpadded isn't valid JSON, return unpadded plaintext anyway.
+                    return unpadded;
                 }
             }
             catch(BangcleException)

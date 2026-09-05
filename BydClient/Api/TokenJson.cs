@@ -20,6 +20,37 @@ namespace BydClient.Api;
     {
         private static readonly IReadOnlyList<int> EndpointNotSupportedCodes = new List<int> { 1004, 1005 };
 
+        public static async Task<T?> PostTokenJsonAsync<T>(
+            string endpoint,
+            BydConfig config,
+            Session session,
+            ITransport transport,
+            Dictionary<string, string?> inner,
+            long? nowMs = null,
+            string? vin = null,
+            string? userType = null,
+            IEnumerable<int>? extraErrorCodes = null)
+        {
+            var decoded = await PostTokenJsonAsync(
+                endpoint,
+                config,
+                session,
+                transport,
+                inner,
+                nowMs,
+                vin,
+                userType,
+                extraErrorCodes);
+
+            if(decoded == null)
+                return default;
+
+            object value = decoded.TryGetValue("items", out var items) ? items : decoded;
+            return JsonSerializer.Deserialize<T>(
+                JsonSerializer.Serialize(value),
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        }
+
         /// <summary>
         /// Post a token-authenticated JSON request to a BYD endpoint.
         /// </summary>
@@ -139,7 +170,30 @@ namespace BydClient.Api;
             Dictionary<string, object>? innerResponse = null;
             try
             {
-                innerResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(plaintext);
+                JsonElement root = JsonSerializer.Deserialize<JsonElement>(plaintext);
+
+                if(root.ValueKind == JsonValueKind.Object)
+                {
+                    innerResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(root.GetRawText());
+                }
+                else if(root.ValueKind == JsonValueKind.Array)
+                {
+                    var items = new List<object>();
+                    foreach(var item in root.EnumerateArray())
+                    {
+                        if(item.ValueKind != JsonValueKind.Object)
+                            continue;
+
+                        var dictItem = JsonSerializer.Deserialize<Dictionary<string, object>>(item.GetRawText());
+                        if(dictItem != null)
+                            items.Add(dictItem);
+                    }
+
+                    innerResponse = new Dictionary<string, object>
+                    {
+                        ["items"] = items
+                    };
+                }
             }
             catch(JsonException)
             {
