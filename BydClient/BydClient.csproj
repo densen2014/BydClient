@@ -34,10 +34,10 @@
     <None Update="Country Label.CSV">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Remove="Data\bangcle_tables.bin" />
+    <EmbeddedResource Include="Data\bangcle_tables.bin"
+                      LogicalName="BydClient.Data.bangcle_tables.bin" />
     <None Update="Country to Node Mapping.CSV">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-    <None Update="Data\bangcle_tables.bin">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="Node to Server Mapping.CSV">

@@ -15,6 +15,7 @@ public class BangcleCodec
 {
     private Dictionary<string, byte[]>? _tables = null;
     private readonly string? _tablesPath;
+    private const string EmbeddedTablesResourceName = "BydClient.Data.bangcle_tables.bin";
 
     // Binary table file format constants
     private const string Magic = "BGTB";
@@ -25,8 +26,6 @@ public class BangcleCodec
     private const int IndexSize = TableCount * IndexEntrySize; // 64
 
     private static readonly byte[] ZeroIv = new byte[16];
-
-    // Expected sizes for each table, in order.
     private static readonly (string Name, int ExpectedLength)[] TableSpecs = new[]
     {
         ("inv_round", 0x28000),
@@ -60,14 +59,25 @@ public class BangcleCodec
         }
         else
         {
-            // Fallback to __DIR__ equivalent: assembly directory + ../data/
-            var assemblyDir = Path.GetDirectoryName(typeof(BangcleCodec).Assembly.Location) ?? AppContext.BaseDirectory;
-            var defaultPath = Path.Combine(assemblyDir, "..", "data", "bangcle_tables.bin");
-
-            if(File.Exists(defaultPath))
-                raw = File.ReadAllBytes(defaultPath);
+            var assembly = typeof(BangcleCodec).Assembly;
+            using var resourceStream = assembly.GetManifestResourceStream(EmbeddedTablesResourceName);
+            if(resourceStream != null)
+            {
+                using var buffer = new MemoryStream();
+                resourceStream.CopyTo(buffer);
+                raw = buffer.ToArray();
+            }
             else
-                throw new BangcleException("bangcle_tables.bin not found. Please provide the path to the tables file.");
+            {
+                // Preserve the legacy loose-file fallback for existing desktop deployments.
+                var assemblyDir = Path.GetDirectoryName(assembly.Location) ?? AppContext.BaseDirectory;
+                var defaultPath = Path.Combine(assemblyDir, "..", "data", "bangcle_tables.bin");
+
+                if(File.Exists(defaultPath))
+                    raw = File.ReadAllBytes(defaultPath);
+                else
+                    throw new BangcleException("bangcle_tables.bin was not found as an embedded resource or external file.");
+            }
         }
 
         _tables = ParseTables(raw);

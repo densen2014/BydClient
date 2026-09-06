@@ -81,7 +81,9 @@ public sealed class BydConfig
         //if (Device.ImeiMd5 == "00000000000000000000000000000000")
         //    Device.ImeiMd5 = Client.ComputeMd5(Device.ImeiMd5);
 
-        TimeZone = TZConvert.WindowsToIana(TimeZoneInfo.Local.Id);
+        TimeZone = TZConvert.TryWindowsToIana(timeZone, out var ianaTimeZone)
+            ? ianaTimeZone
+            : timeZone;
         BaseUrl = GetBaseUrlFromCountryCode(CountryCode, BaseUrl);
         Language = GetLanguage(CountryCode, Language);
     }
